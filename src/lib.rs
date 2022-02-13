@@ -11,6 +11,17 @@
 
 use std::error::Error;
 
+const HEADER_LENGTH_BYTES: usize = 80;
+const NUMBER_OF_TRIANGLES_LENGTH_BYTES: usize = 4;
+
+macro_rules! ensure_length {
+    ($bytes:expr, $len:expr) => {
+        if $bytes.len() < $len {
+            return Err(format!("Not enough bytes, needed: {}", $len - $bytes.len()).into());
+        }
+    };
+}
+
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Triangle {
@@ -20,16 +31,19 @@ pub struct Triangle {
 }
 
 pub fn parse_stl(bytes: &mut [u8]) -> Result<&[Triangle], Box<dyn Error>> {
-    let (_header, rest) = bytes.split_at(80);
-    let (number_of_triangles, rest) = rest.split_at(4);
+    ensure_length!(bytes, HEADER_LENGTH_BYTES);
+
+    let (_header, rest) = bytes.split_at(HEADER_LENGTH_BYTES);
+
+    ensure_length!(rest, NUMBER_OF_TRIANGLES_LENGTH_BYTES);
+
+    let (number_of_triangles, rest) = rest.split_at(NUMBER_OF_TRIANGLES_LENGTH_BYTES);
 
     let number_of_triangles = u32::from_le_bytes(number_of_triangles.try_into().unwrap()) as usize;
 
     let expected_remaining_bytes = number_of_triangles * std::mem::size_of::<Triangle>();
 
-    if rest.len() != expected_remaining_bytes {
-        return Err("bad byte count".into());
-    }
+    ensure_length!(rest, expected_remaining_bytes);
 
     let (prefix, triangles, _rest) = unsafe { rest.align_to::<Triangle>() };
 

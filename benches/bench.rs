@@ -6,7 +6,7 @@ use fstl::parse_stl;
 use std::io::Read;
 
 fn parse_stl_binary_big(c: &mut Criterion) {
-    let mut root_vase = vec![];
+    let mut root_vase = criterion::black_box(vec![]);
 
     std::fs::File::open("./fixtures/Root_Vase.stl")
         .unwrap()
@@ -21,7 +21,8 @@ fn parse_stl_binary_big(c: &mut Criterion) {
 
     group.bench_function("parse_stl_root_vase_binary_big_unindexed", move |b| {
         b.iter(|| {
-            let _triangles = parse_stl(&mut root_vase).unwrap();
+            let triangles = parse_stl(&mut root_vase).unwrap();
+            assert_eq!(triangles.len(), 596_736);
         })
     });
 
