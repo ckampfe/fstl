@@ -29,28 +29,5 @@ fn parse_stl_binary_big(c: &mut Criterion) {
     group.finish();
 }
 
-// fn parse_stl_binary(c: &mut Criterion) {
-//     let moon_file = std::fs::File::open("./fixtures/MOON_PRISM_POWER_binary.stl").unwrap();
-//     let mut moon = BufReader::new(&moon_file);
-//
-//     c.bench_function("parse_stl_moon_prism_power_binary", move |b| {
-//         b.iter(|| parse_stl::<BufReader<&File>>(&mut moon))
-//     });
-// }
-//
-// fn parse_stl_ascii(c: &mut Criterion) {
-//     let moon_file = std::fs::File::open("./fixtures/MOON_PRISM_POWER.stl").unwrap();
-//     let mut moon = BufReader::new(&moon_file);
-//
-//     c.bench_function("parse_stl_moon_prism_power_ascii", move |b| {
-//         b.iter(|| parse_stl::<BufReader<&File>>(&mut moon))
-//     });
-// }
-
-criterion_group!(
-    benches,
-    parse_stl_binary_big,
-    // parse_stl_binary,
-    // parse_stl_ascii
-);
+criterion_group!(benches, parse_stl_binary_big,);
 criterion_main!(benches);
