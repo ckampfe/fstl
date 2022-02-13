@@ -14,14 +14,6 @@ use std::error::Error;
 const HEADER_LENGTH_BYTES: usize = 80;
 const NUMBER_OF_TRIANGLES_LENGTH_BYTES: usize = 4;
 
-macro_rules! ensure_length {
-    ($bytes:expr, $len:expr) => {
-        if $bytes.len() < $len {
-            return Err(format!("Not enough bytes, needed: {}", $len - $bytes.len()).into());
-        }
-    };
-}
-
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Triangle {
@@ -40,6 +32,18 @@ impl Triangle {
     }
 }
 
+macro_rules! ensure_length {
+    ($bytes:expr, $len:expr) => {
+        if $bytes.len() < $len {
+            return Err(format!("Not enough bytes, needed: {}", $len - $bytes.len()).into());
+        }
+    };
+}
+
+/// `bytes` *must* be a well-formed binary STL, meaning:
+/// 1. `bytes` shall contain *only* valid STL header and triangle data, with nothing preceding or trailing
+/// 2. the actual number of triangles shall equal the number of triangles specified in the STL header
+/// 3. all numerics (u32, f32, u16) shall be little-endian
 pub fn parse_stl(bytes: &[u8]) -> Result<&[Triangle], Box<dyn Error>> {
     ensure_length!(bytes, HEADER_LENGTH_BYTES);
 
@@ -55,9 +59,10 @@ pub fn parse_stl(bytes: &[u8]) -> Result<&[Triangle], Box<dyn Error>> {
 
     ensure_length!(rest, expected_remaining_bytes);
 
-    let (prefix, triangles, _rest) = unsafe { rest.align_to::<Triangle>() };
+    let (prefix, triangles, rest) = unsafe { rest.align_to::<Triangle>() };
 
     assert!(prefix.is_empty(), "Data was not aligned");
+    assert!(rest.is_empty(), "Data was not aligned");
 
     Ok(triangles)
 }
