@@ -9,6 +9,7 @@ edition = "2021"
 
 [dev-dependencies]
 criterion = "0.3"
+nom_stl = "0.2"
 quickcheck = "1.0"
 quickcheck_macros = "1.0"
 

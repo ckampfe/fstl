@@ -25,9 +25,19 @@ macro_rules! ensure_length {
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Triangle {
-    pub normal_vector: [f32; 3], // 12
-    pub vertices: [[f32; 3]; 3], // 36
-    _attribute_byte_count: u16,  // 2
+    normal_vector: [f32; 3],    // 12
+    vertices: [[f32; 3]; 3],    // 36
+    _attribute_byte_count: u16, // 2
+}
+
+impl Triangle {
+    pub fn normal_vector(&self) -> [f32; 3] {
+        self.normal_vector
+    }
+
+    pub fn vertices(&self) -> [[f32; 3]; 3] {
+        self.vertices
+    }
 }
 
 pub fn parse_stl(bytes: &[u8]) -> Result<&[Triangle], Box<dyn Error>> {
@@ -65,12 +75,12 @@ mod tests {
             .unwrap()
             .read_to_end(&mut root_vase)
             .unwrap();
-        dbg!(root_vase.len());
 
-        let triangles = parse_stl(&mut root_vase).unwrap();
+        let triangles = parse_stl(&root_vase).unwrap();
 
         assert_eq!(triangles.len(), 596_736);
 
+        // a random triangle
         assert_eq!(
             triangles[999],
             Triangle {
@@ -83,5 +93,31 @@ mod tests {
                 _attribute_byte_count: 0u16
             }
         )
+    }
+
+    #[test]
+    fn vs_nom_stl() {
+        let mut root_vase = vec![];
+        std::fs::File::open("./fixtures/Root_Vase.stl")
+            .unwrap()
+            .read_to_end(&mut root_vase)
+            .unwrap();
+
+        let fstl_triangles = parse_stl(&root_vase).unwrap();
+
+        let cloned = root_vase.clone();
+        let mut nom_bytes = std::io::Cursor::new(cloned);
+        let nom_mesh = nom_stl::parse_stl(&mut nom_bytes).unwrap();
+        let nom_triangles = nom_mesh
+            .triangles()
+            .iter()
+            .map(|t| Triangle {
+                normal_vector: t.normal(),
+                vertices: t.vertices(),
+                _attribute_byte_count: 0,
+            })
+            .collect::<Vec<_>>();
+
+        assert_eq!(fstl_triangles, nom_triangles)
     }
 }
