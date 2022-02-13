@@ -21,7 +21,7 @@ fn parse_stl_binary_big(c: &mut Criterion) {
 
     group.bench_function("parse_stl_root_vase_binary_big_unindexed", move |b| {
         b.iter(|| {
-            let triangles = parse_stl(&mut root_vase).unwrap();
+            let triangles = parse_stl(&root_vase).unwrap();
             assert_eq!(triangles.len(), 596_736);
         })
     });

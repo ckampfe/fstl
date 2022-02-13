@@ -30,7 +30,7 @@ pub struct Triangle {
     _attribute_byte_count: u16,  // 2
 }
 
-pub fn parse_stl(bytes: &mut [u8]) -> Result<&[Triangle], Box<dyn Error>> {
+pub fn parse_stl(bytes: &[u8]) -> Result<&[Triangle], Box<dyn Error>> {
     ensure_length!(bytes, HEADER_LENGTH_BYTES);
 
     let (_header, rest) = bytes.split_at(HEADER_LENGTH_BYTES);
