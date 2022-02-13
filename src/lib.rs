@@ -14,14 +14,14 @@ use std::error::Error;
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Triangle {
-    normal_vector: [f32; 3],    // 12
-    vertices: [[f32; 3]; 3],    // 36
-    _attribute_byte_count: u16, // 2
+    pub normal_vector: [f32; 3], // 12
+    pub vertices: [[f32; 3]; 3], // 36
+    _attribute_byte_count: u16,  // 2
 }
 
 pub fn parse_stl(bytes: &mut [u8]) -> Result<&[Triangle], Box<dyn Error>> {
-    let (header, rest) = bytes.split_at(84);
-    let (_, number_of_triangles) = header.split_at(80);
+    let (_header, rest) = bytes.split_at(80);
+    let (number_of_triangles, rest) = rest.split_at(4);
 
     let number_of_triangles = u32::from_le_bytes(number_of_triangles.try_into().unwrap()) as usize;
 
