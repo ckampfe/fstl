@@ -35,7 +35,7 @@ impl Triangle {
 macro_rules! ensure_length {
     ($bytes:expr, $len:expr) => {
         if $bytes.len() < $len {
-            return Err(format!("Not enough bytes, needed: {}", $len - $bytes.len()).into());
+            return Err(format!("Not enough bytes, needed: {} bytes", $len - $bytes.len()).into());
         }
     };
 }
