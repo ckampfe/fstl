@@ -40,6 +40,19 @@ macro_rules! ensure_length {
     };
 }
 
+macro_rules! ensure_length_exact {
+    ($bytes:expr, $len:expr) => {
+        if $bytes.len() != $len {
+            return Err(format!(
+                "Incorrect remaining length, needed {} bytes, got {} bytes",
+                $len,
+                $bytes.len()
+            )
+            .into());
+        }
+    };
+}
+
 /// `bytes` *must* be a well-formed binary STL, meaning:
 /// 1. `bytes` shall contain *only* valid STL header and triangle data, with nothing preceding or trailing
 /// 2. the actual number of triangles shall equal the number of triangles specified in the STL header
@@ -57,12 +70,12 @@ pub fn parse_stl(bytes: &[u8]) -> Result<&[Triangle], Box<dyn Error>> {
 
     let expected_remaining_bytes = number_of_triangles * std::mem::size_of::<Triangle>();
 
-    ensure_length!(rest, expected_remaining_bytes);
+    ensure_length_exact!(rest, expected_remaining_bytes);
 
     let (prefix, triangles, rest) = unsafe { rest.align_to::<Triangle>() };
 
-    assert!(prefix.is_empty(), "Data was not aligned");
-    assert!(rest.is_empty(), "Data was not aligned");
+    assert!(prefix.is_empty(), "Data was not aligned (prefix)");
+    assert!(rest.is_empty(), "Data was not aligned (suffix)");
 
     Ok(triangles)
 }
