@@ -1,6 +1,6 @@
 # fstl
 
-Load a binary STL file very quickly
+Load a binary [STL](https://en.wikipedia.org/wiki/STL_(file_format)) file very quickly
 
 ## SAFETY WARNING / should you use this
 
